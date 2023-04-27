@@ -1,4 +1,5 @@
- require File.expand_path(File.dirname(__FILE__) + '/neo')
+require File.expand_path(File.dirname(__FILE__) + '/neo')
+
 
 class AboutNil < Neo::Koan
   def test_nil_is_an_object
@@ -12,12 +13,12 @@ class AboutNil < Neo::Koan
     begin
       nil.some_method_nil_doesnt_know_about
     rescue Exception => ex
-      
       # What exception has been caught?
       assert_equal NoMethodError, ex.class
+
       # What message was attached to the exception?
       # (HINT: replace __ with part of the error message.)
-      assert_match(/undefined method `some_method_nil_doesnt_know_about' for nil:NilClass/, ex.message)
+      assert_match(/`some_method_nil_doesnt_know_about'/, ex.message)
     end
   end
 

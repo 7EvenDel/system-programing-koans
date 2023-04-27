@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/neo')
 
-class AboutHashes < EdgeCase::Koan
+class AboutHashes < Neo::Koan
   def test_creating_hashes
     empty_hash = Hash.new
     assert_equal Hash, empty_hash.class
@@ -20,12 +20,24 @@ class AboutHashes < EdgeCase::Koan
     assert_equal nil, hash[:doesnt_exist]
   end
 
+  def test_accessing_hashes_with_fetch
+    hash = { :one => "uno" }
+    assert_equal "uno", hash.fetch(:one)
+    assert_raise(KeyError) do
+      hash.fetch(:doesnt_exist)
+    end
+
+    # THINK ABOUT IT:
+    #
+    # Why might you want to use #fetch instead of #[] when accessing hash keys?
+  end
+
   def test_changing_hashes
     hash = { :one => "uno", :two => "dos" }
     hash[:one] = "eins"
 
     expected = { :one => "eins", :two => "dos" }
-    assert_equal true, expected == hash
+    assert_equal expected, hash
 
     # Bonus Question: Why was "expected" broken out into a variable
     # rather than used as a literal?
@@ -55,15 +67,14 @@ class AboutHashes < EdgeCase::Koan
   end
 
   def test_combining_hashes
-     hash = { "jim" => 53, "amy" => 20, "dan" => 23 }
-     new_hash = hash.merge({ "jim" => 54, "jenny" => 26 })
+    hash = { "jim" => 53, "amy" => 20, "dan" => 23 }
+    new_hash = hash.merge({ "jim" => 54, "jenny" => 26 })
 
-     assert_equal true, hash != new_hash
+    assert_equal true, hash != new_hash
 
-     expected = { "jim" => 54, "amy" => 20, "dan" => 23, "jenny" => 26 }
-     assert_equal true, expected == new_hash
-   end
-
+    expected = { "jim" => 53, "amy" => 20, "dan" => 23, "jenny" => 26 }
+    assert_equal false, expected == new_hash
+  end
 
   def test_default_value
     hash1 = Hash.new

@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/neo')
 
-class AboutStrings < EdgeCase::Koan
+
+class AboutStrings < Neo::Koan
   def test_double_quoted_strings_are_strings
     string = "Hello, World"
     assert_equal true, string.is_a?(String)
@@ -18,7 +19,7 @@ class AboutStrings < EdgeCase::Koan
 
   def test_use_double_quotes_to_create_strings_with_single_quotes
     string = "Don't"
-    assert_equal 'Don\'t', string
+    assert_equal "Don't", string
   end
 
   def test_use_backslash_for_those_hard_cases
@@ -40,23 +41,24 @@ class AboutStrings < EdgeCase::Koan
 It was the best of times,
 It was the worst of times.
 }
-    assert_equal 54, long_string.size
+    assert_equal 54, long_string.length
+    assert_equal 3, long_string.lines.count
+    assert_equal "\n", long_string[0,1]
   end
 
-  
   def test_here_documents_can_also_handle_multiple_lines
     long_string = <<EOS
 It was the best of times,
 It was the worst of times.
 EOS
-    assert_equal 53, long_string.size
+    assert_equal 53, long_string.length
+    assert_equal 2, long_string.lines.count
+    assert_equal "I", long_string[0,1]
   end
-  
-  # hmm, based on the previous notes I don't understand why this is 53?
-  
+
   def test_plus_will_concatenate_two_strings
     string = "Hello, " + "World"
-    assert_equal "Hello, " + "World", string
+    assert_equal "Hello, World", string
   end
 
   def test_plus_concatenation_will_leave_the_original_strings_unmodified
@@ -81,12 +83,7 @@ EOS
     hi += there
     assert_equal "Hello, ", original_string
   end
-  
-  # using += doesn't change the original string object, note that since "hi" was 
-  # set to "original_string" when appending values to "hi" using +=, the "original_string" 
-  # remains unmodified, this is an important difference as when using the << operator 
-  # it would modify the original
-          
+
   def test_the_shovel_operator_will_also_append_content_to_a_string
     hi = "Hello, "
     there = "World"
@@ -107,7 +104,7 @@ EOS
     # Ruby programmers tend to favor the shovel operator (<<) over the
     # plus equals operator (+=) when building up strings.  Why?
   end
-  
+
   def test_double_quoted_string_interpret_escape_characters
     string = "\n"
     assert_equal 1, string.size
@@ -118,17 +115,11 @@ EOS
     assert_equal 2, string.size
   end
 
-  # interesting, when using single quotes this has a length of 2, otherwise its 1
-  
   def test_single_quotes_sometimes_interpret_escape_characters
     string = '\\\''
     assert_equal 2, string.size
     assert_equal "\\'", string
   end
-  
-  # first test result is 2 because \\ cancel out and then the outer single qoutes define 
-  # the string so that just leaves us with \' so we have a size of 2
-  # not sure why on the second test result
 
   def test_double_quoted_strings_interpolate_variables
     value = 123
@@ -136,14 +127,10 @@ EOS
     assert_equal "The value is 123", string
   end
 
-  # placeholders, simple string substitution, the variable name goes within #{} and 
-  # whenever that style syntax exists in a double quoted string it is replaced
-  # note: requires double quotes!!
-  
   def test_single_quoted_strings_do_not_interpolate
     value = 123
     string = 'The value is #{value}'
-    assert_equal 'The value is #{value}', string
+    assert_equal "The value is \#{value}", string
   end
 
   def test_any_ruby_expression_may_be_interpolated
@@ -156,32 +143,27 @@ EOS
     assert_equal "let", string[7,3]
     assert_equal "let", string[7..9]
   end
-  
-  # substring is 0 based
-  # the first param is the start index, second is the length
-  # with ranges the first param is the start index and the second is the end index
-  
+
   def test_you_can_get_a_single_character_from_a_string
     string = "Bacon, lettuce and tomato"
-    assert_equal 97, string[1]
+    assert_equal "a", string[1]
 
     # Surprised?
-    # Yes!
   end
 
   in_ruby_version("1.8") do
-    def test_in_ruby_1_8_single_characters_are_represented_by_integers
-      assert_equal 97, ?a
-      assert_equal true, ?a == 97
-      assert_equal true, ?b == (?a + 1)
+    def test_in_older_ruby_single_characters_are_represented_by_integers
+      assert_equal "a", ?a
+      assert_equal false, ?a == 97
+
+      assert_equal __, ?b == (?a + 1)
     end
   end
 
-  in_ruby_version("1.9") do
-    # NOT TESTED, running Ruby 1.8.7
-    def test_in_ruby_1_9_single_characters_are_represented_by_strings
+  in_ruby_version("1.9", "2", "3") do
+    def test_in_modern_ruby_single_characters_are_represented_by_strings
       assert_equal "a", ?a
-      assert_equal "a", ?a == 97
+      assert_equal false, ?a == 97
     end
   end
 
@@ -206,17 +188,11 @@ EOS
     assert_equal "Now is the time", words.join(" ")
   end
 
-  # split and join work very much the same way as in AS3/JS
-  
-  def test_strings_are_not_unique_objects
+  def test_strings_are_unique_objects
     a = "a string"
     b = "a string"
-    
+
     assert_equal true, a == b
     assert_equal false, a.object_id == b.object_id
   end
-  
-  # strandard stuff, strings match in value so first is true but second will 
-  # be false since they are unique instances
-  
 end
